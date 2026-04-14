@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and points",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "points": { "type": "number" },
+        "rank": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Complaint": {
+      "title": "Complaint",
+      "description": "A civic issue report",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "in-progress", "resolved", "escalated"] },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" },
+            "address": { "type": "string" }
+          }
+        },
+        "imageUrl": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "upvotes": { "type": "number" },
+        "department": { "type": "string" },
+        "assignedOfficer": { "type": "string" },
+        "slaDeadline": { "type": "number" }
+      },
+      "required": ["userId", "title", "category", "status", "location"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/complaints/{complaintId}": {
+      "schema": "Complaint",
+      "description": "Civic issue complaints"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid is string &&
+             data.email is string &&
+             data.points is number &&
+             data.rank is string;
+    }
+    
+    function isValidComplaint(data) {
+      return data.keys().hasAll(['userId', 'title', 'category', 'status', 'location']) &&
+             data.userId == request.auth.uid &&
+             data.title is string && data.title.size() < 200 &&
+             data.category is string &&
+             data.status in ['pending', 'in-progress', 'resolved', 'escalated'] &&
+             data.location is map &&
+             data.upvotes is number;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /complaints/{complaintId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidComplaint(request.resource.data);
+      allow update: if isAuthenticated() && (
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes'])) ||
+        (resource.data.userId == request.auth.uid && isValidComplaint(request.resource.data)) ||
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+  }
+}

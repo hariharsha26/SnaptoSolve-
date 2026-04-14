@@ -1,0 +1,16 @@
+{
+  "name": "Snaptosolve",
+  "description": "A civic issue reporting platform that allows citizens to capture, geo-tag, and submit real-world infrastructure problems to the appropriate government authority.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "AI-powered categorization",
+    "Real-time issue tracking",
+    "Geo-tagging",
+    "Rewards and gamification",
+    "Multilingual support"
+  ]
+}
