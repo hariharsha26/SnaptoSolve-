@@ -22,7 +22,7 @@ export const NeuButton: React.FC<NeuButtonProps> = ({
   
   const variantClasses = {
     primary: "bg-primary-gradient text-white neu-raised shadow-primary/30",
-    secondary: "bg-surface text-text-primary neu-raised",
+    secondary: "bg-surface text-text-primary neu-raised border border-inset",
     ghost: "bg-transparent text-text-secondary hover:bg-surface/50",
   };
 

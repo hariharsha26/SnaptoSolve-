@@ -2,18 +2,62 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "User profile and points",
+      "description": "User profile with role and auth details",
       "type": "object",
       "properties": {
-        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
         "email": { "type": "string" },
-        "displayName": { "type": "string" },
-        "photoURL": { "type": "string" },
-        "points": { "type": "number" },
-        "rank": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "phoneNumber": { "type": ["string", "null"] },
+        "profileImage": { "type": "string" },
+        "role": { "type": "string", "enum": ["citizen", "admin", "moderator"] },
+        "isEmailVerified": { "type": "boolean" },
+        "isPhoneVerified": { "type": "boolean" },
+        "isSuspended": { "type": "boolean" },
+        "fcmTokens": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "number" },
+        "lastLogin": { "type": "number" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "latitude": { "type": "number" },
+            "longitude": { "type": "number" },
+            "address": { "type": "string" },
+            "city": { "type": "string" },
+            "state": { "type": "string" }
+          }
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "complaintsSubmitted": { "type": "number" },
+            "complaintsResolved": { "type": "number" },
+            "trustScore": { "type": "number" }
+          }
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "notificationsEnabled": { "type": "boolean" },
+            "biometricEnabled": { "type": "boolean" },
+            "twoFactorEnabled": { "type": "boolean" }
+          }
+        }
       },
-      "required": ["uid", "email"]
+      "required": ["fullName", "email", "role", "isEmailVerified", "isSuspended", "fcmTokens"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "User login session",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "deviceInfo": { "type": "string" },
+        "ipAddress": { "type": "string" },
+        "loginTime": { "type": "number" },
+        "lastActive": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["userId", "deviceInfo", "ipAddress", "loginTime", "lastActive", "isActive"]
     },
     "Complaint": {
       "title": "Complaint",
@@ -48,6 +92,10 @@
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles"
+    },
+    "/sessions/{sessionId}": {
+      "schema": "Session",
+      "description": "User login sessions"
     },
     "/complaints/{complaintId}": {
       "schema": "Complaint",

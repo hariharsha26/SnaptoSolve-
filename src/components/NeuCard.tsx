@@ -12,9 +12,9 @@ export const NeuCard: React.FC<NeuCardProps> = ({
   ...props
 }) => {
   const variantClasses = {
-    raised: "neu-raised bg-surface",
+    raised: "neu-raised bg-surface border border-inset",
     pressed: "neu-pressed bg-inset",
-    float: "neu-float bg-surface",
+    float: "neu-float bg-surface border border-inset",
   };
 
   return (

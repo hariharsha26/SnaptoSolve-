@@ -3,14 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useStore } from "@/src/store/useStore";
 import { NeuCard } from "@/src/components/NeuCard";
 import { NeuButton } from "@/src/components/NeuButton";
-import { ArrowLeft, Check, Clock, AlertTriangle, Share2, MessageSquare, Phone } from "lucide-react";
+import { ArrowLeft, Check, Clock, Warning, ShareNetwork, ChatCircle, Phone } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { cn } from "@/src/lib/utils";
+import { Skeleton } from "@/src/components/Skeleton";
 
 const Tracking = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { complaints } = useStore();
+  const { complaints, isLoading } = useStore();
   
   const complaint = complaints.find(c => c.id === id) || {
     id: "CMP-2024-1847",
@@ -41,16 +42,33 @@ const Tracking = () => {
       </div>
 
       {/* Summary Card */}
-      <NeuCard className="p-4 flex gap-4 items-center">
-        <img src={complaint.imageUrl} alt="Issue" className="w-16 h-16 rounded-xl object-cover" />
-        <div className="flex-1">
-          <h3 className="text-title-lg font-bold">{complaint.title}</h3>
-          <p className="text-label-md text-text-secondary">ID: {complaint.id}</p>
-        </div>
-        <div className="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">
-          {complaint.status}
-        </div>
-      </NeuCard>
+      {isLoading ? (
+        <NeuCard className="p-4 flex gap-4 items-center">
+          <Skeleton className="w-16 h-16 rounded-xl flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="w-3/4 h-5 rounded" />
+            <Skeleton className="w-1/2 h-4 rounded" />
+          </div>
+          <Skeleton className="w-16 h-6 rounded-full" />
+        </NeuCard>
+      ) : (
+        <NeuCard className="p-4 flex gap-4 items-center border border-inset shadow-sm">
+          <img src={complaint.imageUrl} alt="Issue" className="w-16 h-16 rounded-xl object-cover" />
+          <div className="flex-1">
+            <h3 className="text-title-lg font-bold">{complaint.title}</h3>
+            <p className="text-label-md text-text-secondary">ID: {complaint.id}</p>
+          </div>
+          <div className={cn(
+            "px-3 py-1 rounded-full text-[10px] font-bold uppercase",
+            complaint.status === "pending" ? "bg-[#FFC107]/20 text-[#FFC107]" :
+            complaint.status === "in-progress" ? "bg-[#2196F3]/20 text-[#2196F3]" :
+            complaint.status === "resolved" ? "bg-[#4CAF50]/20 text-[#4CAF50]" :
+            "bg-error/20 text-error"
+          )}>
+            {complaint.status}
+          </div>
+        </NeuCard>
+      )}
 
       {/* Timeline */}
       <div className="relative pl-10 space-y-12 py-4">
@@ -65,8 +83,8 @@ const Tracking = () => {
               step.status === "completed" && "done",
               step.status === "active" && "active animate-pulse",
             )}>
-              {step.status === "completed" ? <Check size={18} /> : 
-               step.status === "active" ? <Clock size={18} /> : 
+              {step.status === "completed" ? <Check size={18} weight="bold" /> : 
+               step.status === "active" ? <Clock size={18} weight="bold" /> : 
                <div className="w-2 h-2 rounded-full bg-text-secondary/30" />}
             </div>
 
@@ -90,7 +108,7 @@ const Tracking = () => {
       {/* Escalation Card */}
       <NeuCard className="p-4 border-l-4 border-warning flex gap-4 items-center">
         <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
-          <AlertTriangle size={20} />
+          <Warning size={20} weight="fill" />
         </div>
         <div className="flex-1 space-y-1">
           <p className="text-label-md font-bold text-text-primary">SLA Countdown</p>
@@ -132,15 +150,15 @@ const Tracking = () => {
       {/* Action Buttons */}
       <div className="grid grid-cols-3 gap-4">
         <NeuButton variant="secondary" className="flex-col h-20 gap-1 rounded-2xl">
-          <MessageSquare size={20} className="text-primary" />
+          <ChatCircle size={20} weight="fill" className="text-primary" />
           <span className="text-[10px] font-bold uppercase">Update</span>
         </NeuButton>
         <NeuButton variant="secondary" className="flex-col h-20 gap-1 rounded-2xl">
-          <Share2 size={20} className="text-primary" />
+          <ShareNetwork size={20} weight="fill" className="text-primary" />
           <span className="text-[10px] font-bold uppercase">Share</span>
         </NeuButton>
         <NeuButton variant="secondary" className="flex-col h-20 gap-1 rounded-2xl">
-          <Phone size={20} className="text-primary" />
+          <Phone size={20} weight="fill" className="text-primary" />
           <span className="text-[10px] font-bold uppercase">Contact</span>
         </NeuButton>
       </div>

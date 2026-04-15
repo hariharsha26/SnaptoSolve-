@@ -1,6 +1,18 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, query, orderBy, getDoc } from "firebase/firestore";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  sendEmailVerification, 
+  signInAnonymously, 
+  RecaptchaVerifier, 
+  signInWithPhoneNumber,
+  onAuthStateChanged,
+  signOut
+} from "firebase/auth";
+import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, query, orderBy, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 // Import the Firebase configuration
 import firebaseConfig from "../../firebase-applet-config.json";
@@ -10,7 +22,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const googleProvider = new GoogleAuthProvider();
 
-export { collection, addDoc, updateDoc, doc, onSnapshot, query, orderBy, getDoc };
+export { collection, addDoc, updateDoc, doc, onSnapshot, query, orderBy, getDoc, setDoc, serverTimestamp };
 
 export enum OperationType {
   CREATE = 'create',
@@ -71,4 +83,15 @@ export const signInWithGoogle = async () => {
     console.error("Error signing in with Google", error);
     throw error;
   }
+};
+
+export {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signInAnonymously,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  onAuthStateChanged,
+  signOut
 };

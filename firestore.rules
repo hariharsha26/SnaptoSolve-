@@ -1,7 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // ===============================================================
     // Helper Functions
+    // ===============================================================
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -9,40 +11,119 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
-    function isValidUser(data) {
-      return data.keys().hasAll(['uid', 'email']) &&
-             data.uid is string &&
-             data.email is string &&
-             data.points is number &&
-             data.rank is string;
+
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
-    
+
+    function getRole() {
+      return getUserDoc().role;
+    }
+
+    function isSuspended() {
+      return getUserDoc().isSuspended == true;
+    }
+
+    function isVerified() {
+      return getUserDoc().isEmailVerified == true || getUserDoc().isPhoneVerified == true;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getRole() == 'admin';
+    }
+
+    function isModerator() {
+      return isAuthenticated() && getRole() == 'moderator';
+    }
+
+    function isCitizen() {
+      return isAuthenticated() && getRole() == 'citizen';
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['fullName', 'email', 'role', 'isEmailVerified', 'isSuspended', 'fcmTokens']) &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.role in ['citizen', 'admin', 'moderator'] &&
+             data.isEmailVerified is bool &&
+             data.isSuspended is bool &&
+             data.fcmTokens is list;
+    }
+
+    function isValidSession(data) {
+      return data.keys().hasAll(['userId', 'deviceInfo', 'ipAddress', 'loginTime', 'lastActive', 'isActive']) &&
+             data.userId is string &&
+             data.deviceInfo is string &&
+             data.ipAddress is string &&
+             data.loginTime is number &&
+             data.lastActive is number &&
+             data.isActive is bool;
+    }
+
     function isValidComplaint(data) {
       return data.keys().hasAll(['userId', 'title', 'category', 'status', 'location']) &&
              data.userId == request.auth.uid &&
-             data.title is string && data.title.size() < 200 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
              data.category is string &&
              data.status in ['pending', 'in-progress', 'resolved', 'escalated'] &&
-             data.location is map &&
-             data.upvotes is number;
+             data.location is map;
     }
 
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isOwner(userId) && isValidUser(request.resource.data);
-      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+      // Owner, moderator, and admin can read
+      allow read: if isAuthenticated() && (isOwner(userId) || isModerator() || isAdmin());
+      
+      // On create: role must be "citizen", isSuspended must be false
+      allow create: if isOwner(userId) && 
+                       isValidUser(request.resource.data) && 
+                       request.resource.data.role == 'citizen' &&
+                       request.resource.data.isSuspended == false;
+      
+      // On update: Owner cannot change role, stats, or isSuspended. Admin can change anything.
+      allow update: if isAuthenticated() && (
+        (isOwner(userId) && 
+         isValidUser(request.resource.data) && 
+         request.resource.data.role == resource.data.role &&
+         request.resource.data.isSuspended == resource.data.isSuspended &&
+         (!('stats' in request.resource.data) || request.resource.data.stats == resource.data.stats)
+        ) || isAdmin()
+      );
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidSession(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     match /complaints/{complaintId} {
+      // Anyone authenticated can read (including anonymous)
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidComplaint(request.resource.data);
-      allow update: if isAuthenticated() && (
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes'])) ||
-        (resource.data.userId == request.auth.uid && isValidComplaint(request.resource.data)) ||
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      
+      // Only verified, non-suspended citizens can create
+      allow create: if isAuthenticated() && 
+                       !isSuspended() && 
+                       isVerified() && 
+                       isValidComplaint(request.resource.data);
+      
+      // Update logic based on roles
+      allow update: if isAuthenticated() && !isSuspended() && (
+        // Owner can update if status is pending
+        (resource.data.userId == request.auth.uid && resource.data.status == 'pending' && isValidComplaint(request.resource.data)) ||
+        // Moderator can update but cannot set to resolved
+        (isModerator() && request.resource.data.status != 'resolved') ||
+        // Admin can do anything
+        isAdmin() ||
+        // Allow upvoting
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes']))
       );
-      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      
+      // Only admin can delete
+      allow delete: if isAdmin();
     }
   }
 }

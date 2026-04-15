@@ -32,9 +32,9 @@
   --text-primary: #191b22;
   --text-secondary: #424654;
 
-  --shadow-raised-val: -6px -6px 12px #ffffff, 6px 6px 12px rgba(0,0,0,0.08);
-  --shadow-pressed-val: inset -4px -4px 8px #ffffff, inset 4px 4px 8px rgba(0,0,0,0.08);
-  --shadow-float-val: -8px -8px 16px #ffffff, 8px 8px 16px rgba(0,0,0,0.12);
+  --shadow-raised-val: 0 4px 6px rgba(0,0,0,0.15);
+  --shadow-pressed-val: inset 0 2px 4px rgba(0,0,0,0.15);
+  --shadow-float-val: 0 8px 16px rgba(0,0,0,0.15);
 }
 
 .dark {
@@ -49,9 +49,9 @@
   --text-primary: #e8eaf6;
   --text-secondary: #9aa3c2;
 
-  --shadow-raised-val: -6px -6px 12px rgba(255,255,255,0.05), 6px 6px 12px rgba(0,0,0,0.4);
-  --shadow-pressed-val: inset -4px -4px 8px rgba(255,255,255,0.05), inset 4px 4px 8px rgba(0,0,0,0.4);
-  --shadow-float-val: -8px -8px 16px rgba(255,255,255,0.05), 8px 8px 16px rgba(0,0,0,0.4);
+  --shadow-raised-val: 0 4px 6px rgba(0,0,0,0.4);
+  --shadow-pressed-val: inset 0 2px 4px rgba(0,0,0,0.4);
+  --shadow-float-val: 0 8px 16px rgba(0,0,0,0.4);
 }
 
 @layer base {
@@ -82,7 +82,7 @@
 }
 
 @utility bento-card {
-  @apply bg-surface rounded-[24px] p-5 neu-raised transition-all duration-300 hover:neu-float;
+  @apply bg-surface rounded-[24px] p-5 neu-raised transition-all duration-300 hover:neu-float border border-inset;
 }
 
 @utility pill {

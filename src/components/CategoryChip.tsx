@@ -1,15 +1,15 @@
 import React from "react";
 import { cn } from "@/src/lib/utils";
-import { LucideIcon } from "lucide-react";
+import { Icon } from "@phosphor-icons/react";
 
 interface CategoryChipProps {
-  icon: LucideIcon;
+  icon: Icon;
   label: string;
   isSelected?: boolean;
   onClick?: () => void;
 }
 
-export const CategoryChip: React.FC<CategoryChipProps> = ({ icon: Icon, label, isSelected, onClick }) => {
+export const CategoryChip: React.FC<CategoryChipProps> = ({ icon: IconComponent, label, isSelected, onClick }) => {
   return (
     <button
       onClick={onClick}
@@ -18,7 +18,7 @@ export const CategoryChip: React.FC<CategoryChipProps> = ({ icon: Icon, label, i
         isSelected ? "bg-primary-gradient text-white shadow-lg" : "bg-surface neu-raised text-text-secondary"
       )}
     >
-      <Icon size={16} />
+      <IconComponent size={16} weight={isSelected ? "fill" : "regular"} />
       <span className="text-label-md font-bold uppercase">{label}</span>
     </button>
   );

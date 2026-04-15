@@ -3,20 +3,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { NeuCard } from "@/src/components/NeuCard";
 import { NeuButton } from "@/src/components/NeuButton";
 import { NeuInput } from "@/src/components/NeuInput";
-import { Droplets, Zap, Triangle, Trash2, PawPrint, Flame, Plus, MapPin, Pencil, Check, Loader2 } from "lucide-react";
+import { Drop, Lightning, Warning, Trash, PawPrint, Fire, Plus, MapPin, Pencil, Check, CircleNotch } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { categorizeIssue } from "@/src/services/geminiService";
 import { useStore } from "@/src/store/useStore";
 import { db, collection, addDoc, handleFirestoreError, OperationType } from "@/src/services/firebase";
 import { cn } from "@/src/lib/utils";
+import { Skeleton } from "@/src/components/Skeleton";
 
 const categories = [
-  { id: "drainage", icon: Droplets, label: "Drainage", color: "text-blue-500" },
-  { id: "electrical", icon: Zap, label: "Electrical", color: "text-yellow-500" },
-  { id: "roads", icon: Triangle, label: "Roads", color: "text-orange-500" },
-  { id: "garbage", icon: Trash2, label: "Garbage", color: "text-green-500" },
+  { id: "drainage", icon: Drop, label: "Drainage", color: "text-blue-500" },
+  { id: "electrical", icon: Lightning, label: "Electrical", color: "text-yellow-500" },
+  { id: "roads", icon: Warning, label: "Roads", color: "text-orange-500" },
+  { id: "garbage", icon: Trash, label: "Garbage", color: "text-green-500" },
   { id: "animal", icon: PawPrint, label: "Animal", color: "text-purple-500" },
-  { id: "fire", icon: Flame, label: "Fire", color: "text-red-500" },
+  { id: "fire", icon: Fire, label: "Fire", color: "text-red-500" },
   { id: "other", icon: Plus, label: "Other", color: "text-gray-500" },
 ];
 
@@ -57,6 +58,11 @@ const SubmissionForm = () => {
   }, []);
 
   const handleSubmit = async () => {
+    if (user?.isAnonymous) {
+      alert("You must be logged in to submit a complaint.");
+      return;
+    }
+    
     setIsSubmitting(true);
     
     const newComplaint = {
@@ -103,7 +109,7 @@ const SubmissionForm = () => {
             exit={{ opacity: 0 }}
             className="flex items-center gap-3 bg-inset p-4 rounded-2xl border border-primary/20"
           >
-            <Loader2 className="animate-spin text-primary" size={20} />
+            <CircleNotch className="animate-spin text-primary" size={20} weight="bold" />
             <span className="text-body-md font-semibold text-primary">AI is analyzing the issue...</span>
           </motion.div>
         )}
@@ -116,7 +122,7 @@ const SubmissionForm = () => {
           className="bg-success/10 p-4 rounded-2xl border border-success/20 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
-            <Check className="text-success" size={20} />
+            <Check className="text-success" size={20} weight="bold" />
             <span className="text-body-md font-semibold text-success">AI detected: Drainage issue</span>
           </div>
           <button className="text-[10px] font-bold text-success uppercase underline">Change</button>
@@ -127,29 +133,35 @@ const SubmissionForm = () => {
       <div className="space-y-3">
         <label className="text-label-md font-bold text-text-secondary ml-2">Category</label>
         <div className="grid grid-cols-3 gap-4">
-          {categories.slice(0, 6).map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setFormData({ ...formData, category: cat.id })}
-              className="w-full"
-            >
-              <NeuCard 
-                variant={formData.category === cat.id ? "pressed" : "raised"}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-2 h-24 transition-all",
-                  formData.category === cat.id && "bg-primary/5 ring-2 ring-primary/20"
-                )}
+          {isAnalyzing ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="w-full h-24 rounded-[24px]" />
+            ))
+          ) : (
+            categories.slice(0, 6).map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setFormData({ ...formData, category: cat.id })}
+                className="w-full"
               >
-                <cat.icon size={28} className={formData.category === cat.id ? "text-primary" : "text-text-secondary"} />
-                <span className={cn(
-                  "text-[10px] font-bold uppercase",
-                  formData.category === cat.id ? "text-primary" : "text-text-secondary"
-                )}>
-                  {cat.label}
-                </span>
-              </NeuCard>
-            </button>
-          ))}
+                <NeuCard 
+                  variant={formData.category === cat.id ? "pressed" : "raised"}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-2 h-24 transition-all",
+                    formData.category === cat.id && "bg-primary/5 ring-2 ring-primary/20"
+                  )}
+                >
+                  <cat.icon size={28} weight={formData.category === cat.id ? "fill" : "regular"} className={formData.category === cat.id ? "text-primary" : "text-text-secondary"} />
+                  <span className={cn(
+                    "text-[10px] font-bold uppercase",
+                    formData.category === cat.id ? "text-primary" : "text-text-secondary"
+                  )}>
+                    {cat.label}
+                  </span>
+                </NeuCard>
+              </button>
+            ))
+          )}
         </div>
       </div>
 
@@ -168,7 +180,7 @@ const SubmissionForm = () => {
             value={formData.location} 
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
           />
-          <MapPin size={18} className="absolute right-4 bottom-3.5 text-primary" />
+          <MapPin size={18} weight="fill" className="absolute right-4 bottom-3.5 text-primary" />
         </div>
 
         <NeuInput 
@@ -183,19 +195,32 @@ const SubmissionForm = () => {
       {/* Priority */}
       <div className="space-y-3">
         <label className="text-label-md font-bold text-text-secondary ml-2">Priority Level</label>
-        <div className="flex bg-inset neu-pressed rounded-full p-1">
-          {["Low", "Medium", "High", "Urgent"].map((p) => (
-            <button
-              key={p}
-              onClick={() => setFormData({ ...formData, priority: p })}
-              className={cn(
-                "flex-1 py-2 text-[10px] font-bold uppercase rounded-full transition-all",
-                formData.priority === p ? "bg-primary-gradient text-white shadow-lg" : "text-text-secondary"
-              )}
-            >
-              {p}
-            </button>
-          ))}
+        <div className="flex gap-2">
+          {["Low", "Medium", "High", "Urgent"].map((p) => {
+            const isSelected = formData.priority === p;
+            let colorClass = "border-inset text-text-secondary";
+            if (isSelected) {
+              if (p === "Low") colorClass = "bg-[#4CAF50] border-[#4CAF50] text-white shadow-md";
+              else if (p === "Medium") colorClass = "bg-[#2196F3] border-[#2196F3] text-white shadow-md";
+              else if (p === "High") colorClass = "bg-[#FFC107] border-[#FFC107] text-white shadow-md";
+              else if (p === "Urgent") colorClass = "bg-error border-error text-white shadow-md";
+            } else {
+              colorClass = "border-inset text-text-secondary hover:bg-inset";
+            }
+
+            return (
+              <button
+                key={p}
+                onClick={() => setFormData({ ...formData, priority: p })}
+                className={cn(
+                  "flex-1 py-2 text-[10px] font-bold uppercase rounded-full transition-all border",
+                  colorClass
+                )}
+              >
+                {p}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -209,7 +234,7 @@ const SubmissionForm = () => {
       >
         {isSubmitting ? (
           <div className="flex items-center gap-3">
-            <Loader2 className="animate-spin" size={24} />
+            <CircleNotch className="animate-spin" size={24} weight="bold" />
             <span>Routing to department...</span>
           </div>
         ) : "Submit Complaint"}
@@ -230,7 +255,7 @@ const SubmissionForm = () => {
               className="w-full max-w-md bg-surface rounded-t-[40px] p-8 space-y-6 neu-raised"
             >
               <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mx-auto">
-                <Check size={40} className="text-success" />
+                <Check size={40} weight="bold" className="text-success" />
               </div>
               <div className="text-center space-y-2">
                 <h2 className="text-headline-sm font-bold">Complaint Submitted!</h2>

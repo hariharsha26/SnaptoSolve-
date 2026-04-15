@@ -4,7 +4,7 @@ import L from "leaflet";
 import { useStore } from "@/src/store/useStore";
 import { NeuCard } from "@/src/components/NeuCard";
 import { NeuButton } from "@/src/components/NeuButton";
-import { Search, Filter, MapPin, Droplets, Zap, Triangle, Trash2, ChevronRight } from "lucide-react";
+import { MagnifyingGlass, Faders, MapPin, Drop, Lightning, Warning, Trash, CaretRight } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/src/lib/utils";
@@ -38,7 +38,7 @@ const MapView = () => {
     : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
   return (
-    <div className="h-full relative">
+    <div className="absolute inset-0 pb-16">
       <MapContainer 
         center={[17.3850, 78.4867]} 
         zoom={13} 
@@ -67,11 +67,11 @@ const MapView = () => {
           <input 
             type="text" 
             placeholder="Search location or issue..." 
-            className="w-full h-12 bg-surface neu-raised rounded-full px-12 text-body-md focus:outline-none"
+            className="w-full bg-surface border border-inset shadow-sm rounded-full px-12 py-3 text-body-md focus:outline-none focus:border-primary transition-colors"
           />
-          <Search size={20} className="absolute left-4 top-3.5 text-text-secondary" />
-          <button className="absolute right-4 top-3 text-primary">
-            <Filter size={20} />
+          <MagnifyingGlass size={20} weight="bold" className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <button className="absolute right-4 top-1/2 -translate-y-1/2 text-primary">
+            <Faders size={20} weight="bold" />
           </button>
         </div>
       </div>
@@ -89,16 +89,16 @@ const MapView = () => {
               <div className="flex justify-between items-start">
                 <div className="flex gap-4">
                   <div className="w-16 h-16 rounded-xl bg-inset flex items-center justify-center text-primary">
-                    <Droplets size={32} />
+                    <Drop size={32} weight="fill" />
                   </div>
                   <div>
                     <h3 className="text-title-lg font-bold">{selectedIssue.title}</h3>
                     <div className="flex items-center gap-2">
                       <span className={cn(
-                        "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full",
-                        selectedIssue.status === "pending" ? "bg-warning/20 text-warning" :
-                        selectedIssue.status === "in-progress" ? "bg-primary/20 text-primary" :
-                        selectedIssue.status === "resolved" ? "bg-success/20 text-success" :
+                        "text-[10px] font-bold uppercase px-3 py-1 rounded-full",
+                        selectedIssue.status === "pending" ? "bg-[#FFC107]/20 text-[#FFC107]" :
+                        selectedIssue.status === "in-progress" ? "bg-[#2196F3]/20 text-[#2196F3]" :
+                        selectedIssue.status === "resolved" ? "bg-[#4CAF50]/20 text-[#4CAF50]" :
                         "bg-error/20 text-error"
                       )}>
                         {selectedIssue.status}
@@ -108,13 +108,13 @@ const MapView = () => {
                   </div>
                 </div>
                 <button onClick={() => setSelectedIssue(null)} className="text-text-secondary">
-                  <ChevronRight size={24} className="rotate-90" />
+                  <CaretRight size={24} weight="bold" className="rotate-90" />
                 </button>
               </div>
               
               <div className="flex justify-between items-center pt-2">
                 <div className="flex items-center gap-2 text-text-secondary text-label-md">
-                  <MapPin size={14} />
+                  <MapPin size={14} weight="fill" />
                   <span>Jubilee Hills, Hyderabad</span>
                 </div>
                 <span className="text-label-md font-bold">14 reports</span>

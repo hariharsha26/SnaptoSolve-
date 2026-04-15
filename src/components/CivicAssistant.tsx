@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { NeuCard } from "./NeuCard";
 import { NeuButton } from "./NeuButton";
 import { NeuInput } from "./NeuInput";
-import { MessageSquare, X, Send, Bot, User } from "lucide-react";
+import { ChatCircle, X, PaperPlaneRight, Robot, User } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { getCivicAssistantResponse } from "../services/geminiService";
 
@@ -47,7 +47,7 @@ export const CivicAssistant = () => {
           className="w-14 h-14 rounded-2xl shadow-primary/40"
           onClick={() => setIsOpen(true)}
         >
-          <MessageSquare size={28} />
+          <ChatCircle size={28} weight="fill" />
         </NeuButton>
       </div>
 
@@ -64,7 +64,7 @@ export const CivicAssistant = () => {
               <div className="p-4 border-b border-text-secondary/10 flex justify-between items-center bg-surface">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary-gradient flex items-center justify-center text-white">
-                    <Bot size={24} />
+                    <Robot size={24} weight="fill" />
                   </div>
                   <div>
                     <h3 className="text-title-lg font-bold">Civic Assistant</h3>
@@ -72,7 +72,7 @@ export const CivicAssistant = () => {
                   </div>
                 </div>
                 <button onClick={() => setIsOpen(false)} className="text-text-secondary">
-                  <X size={24} />
+                  <X size={24} weight="bold" />
                 </button>
               </div>
 
@@ -87,7 +87,7 @@ export const CivicAssistant = () => {
                       "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
                       msg.role === "user" ? "bg-primary text-white" : "bg-inset text-primary"
                     )}>
-                      {msg.role === "user" ? <User size={16} /> : <Bot size={16} />}
+                      {msg.role === "user" ? <User size={16} weight="fill" /> : <Robot size={16} weight="fill" />}
                     </div>
                     <div className={cn(
                       "max-w-[80%] p-3 rounded-2xl text-body-md",
@@ -100,7 +100,7 @@ export const CivicAssistant = () => {
                 {isLoading && (
                   <div className="flex gap-3">
                     <div className="w-8 h-8 rounded-full bg-inset flex items-center justify-center text-primary">
-                      <Bot size={16} />
+                      <Robot size={16} weight="fill" />
                     </div>
                     <div className="bg-inset p-3 rounded-2xl rounded-tl-none">
                       <div className="flex gap-1">
@@ -127,7 +127,7 @@ export const CivicAssistant = () => {
                   onClick={handleSend}
                   disabled={isLoading}
                 >
-                  <Send size={20} />
+                  <PaperPlaneRight size={20} weight="fill" />
                 </NeuButton>
               </div>
             </NeuCard>
